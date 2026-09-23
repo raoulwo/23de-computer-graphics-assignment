@@ -9,6 +9,7 @@ public enum BlockType
     Furnace,
 }
 
+[ExecuteAlways]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
 public class ProceduralBlock : MonoBehaviour
@@ -34,7 +35,20 @@ public class ProceduralBlock : MonoBehaviour
         public Vector2Int Bottom;
     }
 
-    private void Start()
+    // We use `OnEnable` instead of `Start` so that the block is also rendered in
+    // the editor view, not only during play.
+    private void OnEnable()
+    {
+        BuildBlock();
+    }
+
+    // Build the block live any time we change a serialized variable.
+    private void OnValidate()
+    {
+        BuildBlock();
+    }
+
+    private void BuildBlock()
     {
         _meshRenderer = GetComponent<MeshRenderer>();
         _meshFilter = GetComponent<MeshFilter>();
@@ -149,14 +163,20 @@ public class ProceduralBlock : MonoBehaviour
         Array.Copy(GetTileUVs(tiles.Top), 0, uvs, 16, 4);
         Array.Copy(GetTileUVs(tiles.Bottom), 0, uvs, 20, 4);
 
-        _mesh = new Mesh
+        if (_mesh == null)
         {
-            name = "ProceduralBlock",
-            vertices = vertices,
-            triangles = triangles,
-            normals = normals,
-            uv = uvs,
-        };
+            _mesh = new Mesh { name = "ProceduralBlock" };
+        }
+        else
+        {
+            // NOTE: We need to clear the mesh first before updating it live (else we'll leak memory).
+            _mesh.Clear();
+        }
+
+        _mesh.vertices = vertices;
+        _mesh.triangles = triangles;
+        _mesh.normals = normals;
+        _mesh.uv = uvs;
 
         _meshFilter.sharedMesh = _mesh;
     }
