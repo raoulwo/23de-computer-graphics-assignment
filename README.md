@@ -10,7 +10,7 @@
 ## Work Hours
 
 - INSERT NAME: ~XXh
-- Raoul Wograndl: ~1h
+- Raoul Wograndl: ~2.5h
 
 ## Contributions
 
@@ -22,6 +22,10 @@
 
 - Set up project
 - Render cube mesh
+- Define cube normals
+- Define cube UVs
+- Map texture atlas tiles to cube faces
+- Render cubes during editor view
 
 ## Unity Version
 
