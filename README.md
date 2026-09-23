@@ -1,6 +1,6 @@
 # 23DE Computer Graphics Assignment
 
-[Vertices Reference](vertices-reference.png)
+- [Vertices Reference](vertices-reference.png)
 
 ## Team
 
@@ -26,6 +26,7 @@
 - Define cube UVs
 - Map texture atlas tiles to cube faces
 - Render cubes during editor view
+- Create rotating directional light
 
 ## Unity Version
 
