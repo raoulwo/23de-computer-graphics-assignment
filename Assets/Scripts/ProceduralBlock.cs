@@ -1,8 +1,12 @@
+using System;
 using UnityEngine;
 
 public enum BlockType
 {
     Dirt,
+    Stone,
+    CraftingTable,
+    Furnace,
 }
 
 [RequireComponent(typeof(MeshRenderer))]
@@ -10,15 +14,25 @@ public enum BlockType
 public class ProceduralBlock : MonoBehaviour
 {
     private const string UrpLitShader = "Universal Render Pipeline/Lit";
-    
+
     private static readonly int BaseMap = Shader.PropertyToID("_BaseMap");
-    
+
     [SerializeField] private Texture2D textureAtlas;
     [SerializeField] private BlockType blockType;
 
     private MeshRenderer _meshRenderer;
     private MeshFilter _meshFilter;
     private Mesh _mesh;
+
+    private struct FaceTiles
+    {
+        public Vector2Int Front;
+        public Vector2Int Back;
+        public Vector2Int Right;
+        public Vector2Int Left;
+        public Vector2Int Top;
+        public Vector2Int Bottom;
+    }
 
     private void Start()
     {
@@ -30,6 +44,7 @@ public class ProceduralBlock : MonoBehaviour
         {
             material.SetTexture(BaseMap, textureAtlas);
         }
+
         _meshRenderer.sharedMaterial = material;
 
         // NOTE: I've defined the vertex order for a single face the following way.
@@ -100,7 +115,7 @@ public class ProceduralBlock : MonoBehaviour
             16, 18, 17, 16, 19, 18,
 
             // Bottom face triangles
-            20, 22, 21, 20, 23, 22
+            20, 22, 21, 20, 23, 22,
         };
 
         var normals = new[]
@@ -124,20 +139,15 @@ public class ProceduralBlock : MonoBehaviour
             Vector3.down, Vector3.down, Vector3.down, Vector3.down,
         };
 
-        var frontUVs = GetTileUVs(2, 15);
-        var backUVs = GetTileUVs(2, 15);
-        var rightUVs = GetTileUVs(2, 15);
-        var leftUVs = GetTileUVs(2, 15);
-        var topUVs = GetTileUVs(2, 15);
-        var bottomUVs = GetTileUVs(2, 15);
+        var tiles = GetFaceTiles(blockType);
 
         var uvs = new Vector2[24];
-        System.Array.Copy(frontUVs, 0, uvs, 0, 4);
-        System.Array.Copy(backUVs, 0, uvs, 4, 4);
-        System.Array.Copy(rightUVs, 0, uvs, 8, 4);
-        System.Array.Copy(leftUVs, 0, uvs, 12, 4);
-        System.Array.Copy(topUVs, 0, uvs, 16, 4);
-        System.Array.Copy(bottomUVs, 0, uvs, 20, 4);
+        Array.Copy(GetTileUVs(tiles.Front), 0, uvs, 0, 4);
+        Array.Copy(GetTileUVs(tiles.Back), 0, uvs, 4, 4);
+        Array.Copy(GetTileUVs(tiles.Right), 0, uvs, 8, 4);
+        Array.Copy(GetTileUVs(tiles.Left), 0, uvs, 12, 4);
+        Array.Copy(GetTileUVs(tiles.Top), 0, uvs, 16, 4);
+        Array.Copy(GetTileUVs(tiles.Bottom), 0, uvs, 20, 4);
 
         _mesh = new Mesh
         {
@@ -151,12 +161,56 @@ public class ProceduralBlock : MonoBehaviour
         _meshFilter.sharedMesh = _mesh;
     }
 
-    /**
-     * This helper method maps the tile coordinates from 0-15 of our block atlas to
-     * corresponding UVs ranging from 0-1. U represents the horizontal axis, V the
-     * vertical axis. The origin being at the bottom left at (0,0), top right being
-     * at (1, 1).
-     */
+    private static FaceTiles GetFaceTiles(BlockType type)
+    {
+        return type switch
+        {
+            BlockType.Dirt => new FaceTiles
+            {
+                Front = new Vector2Int(2, 15),
+                Back = new Vector2Int(2, 15),
+                Right = new Vector2Int(2, 15),
+                Left = new Vector2Int(2, 15),
+                Top = new Vector2Int(2, 15),
+                Bottom = new Vector2Int(2, 15),
+            },
+            BlockType.Stone => new FaceTiles
+            {
+                Front = new Vector2Int(1, 15),
+                Back = new Vector2Int(1, 15),
+                Right = new Vector2Int(1, 15),
+                Left = new Vector2Int(1, 15),
+                Top = new Vector2Int(1, 15),
+                Bottom = new Vector2Int(1, 15),
+            },
+            BlockType.CraftingTable => new FaceTiles
+            {
+                Front = new Vector2Int(12, 12),
+                Back = new Vector2Int(12, 12),
+                Right = new Vector2Int(11, 12),
+                Left = new Vector2Int(11, 12),
+                Top = new Vector2Int(11, 13),
+                Bottom = new Vector2Int(4, 15),
+            },
+            BlockType.Furnace => new FaceTiles
+            {
+                Front = new Vector2Int(12, 13),
+                Back = new Vector2Int(13, 13),
+                Right = new Vector2Int(13, 13),
+                Left = new Vector2Int(13, 13),
+                Top = new Vector2Int(14, 12),
+                Bottom = new Vector2Int(14, 12),
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
+    /// <summary>
+    /// This helper method maps the tile coordinates from 0-15 of our block atlas
+    /// to corresponding UVs ranging from 0-1. U represents the horizontal axis,
+    /// V the vertical axis. The origin being at the bottom left at (0,0),
+    /// top right being at (1, 1).
+    /// </summary>
     private static Vector2[] GetTileUVs(int tileX, int tileY)
     {
         // NOTE: The provided block atlas has dimensions of 16x16 tiles (blocks).
@@ -176,5 +230,11 @@ public class ProceduralBlock : MonoBehaviour
             new Vector2(uMax, vMax), // Top right
             new Vector2(uMin, vMax), // Top left
         };
+    }
+
+    /// <inheritdoc cref="GetTileUVs(int, int)" />
+    private static Vector2[] GetTileUVs(Vector2Int tileCoords)
+    {
+        return GetTileUVs(tileCoords.x, tileCoords.y);
     }
 }
