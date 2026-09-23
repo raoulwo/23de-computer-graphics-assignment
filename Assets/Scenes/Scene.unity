@@ -478,6 +478,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 756d7456d48e49948a0a6840b977a39b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProceduralBlock
+  textureAtlas: {fileID: 2800000, guid: d149ecf1014ef784f96eb07aca176741, type: 3}
   blockType: 0
 --- !u!23 &2126692978
 MeshRenderer:
