@@ -1,5 +1,7 @@
 # 23DE Computer Graphics Assignment
 
+[Vertices Reference](vertices-reference.png)
+
 ## Team
 
 - INSERT NAME (ct26mXXX)
@@ -8,7 +10,7 @@
 ## Work Hours
 
 - INSERT NAME: ~XXh
-- Raoul Wograndl: ~XXh
+- Raoul Wograndl: ~1h
 
 ## Contributions
 
@@ -18,7 +20,8 @@
 
 ### Raoul Wograndl
 
-- TODO
+- Set up project
+- Render cube mesh
 
 ## Unity Version
 
